@@ -30,6 +30,7 @@ import mesosphere.marathon.core.task.tracker.InstanceTracker
 import mesosphere.marathon.core.task.update.TaskStatusUpdateProcessor
 import mesosphere.marathon.core.task.update.impl.steps._
 import mesosphere.marathon.core.task.update.impl.{TaskStatusUpdateProcessorImpl, ThrottlingTaskStatusUpdateProcessor}
+import mesosphere.marathon.experimental.repository.SyncTemplateRepository
 import mesosphere.marathon.metrics.Metrics
 import mesosphere.marathon.plugin.auth.{Authenticator, Authorizer}
 import mesosphere.marathon.plugin.http.HttpRequestHandler
@@ -256,4 +257,7 @@ class CoreGuiceModule(cliConf: MarathonConf) extends AbstractModule {
 
   @Provides @Singleton
   def heartbeatMonitor(coreModule: CoreModule): MesosHeartbeatMonitor = coreModule.mesosHeartbeatMonitor
+
+  @Provides @Singleton
+  def templateRepository(coreModule: CoreModule): SyncTemplateRepository = coreModule.templateRepository
 }

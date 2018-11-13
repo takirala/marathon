@@ -66,6 +66,9 @@ class MarathonRestModule() extends AbstractModule {
     bind(classOf[CacheDisablingFilter]).asEagerSingleton()
     bind(classOf[WebJarServlet]).in(Scopes.SINGLETON)
     bind(classOf[PublicServlet]).in(Scopes.SINGLETON)
+
+    // Experimental V3 API
+    bind(classOf[v3.TemplatesResource]).in(Scopes.SINGLETON)
   }
 
   @Provides
@@ -89,6 +92,7 @@ class MarathonRestModule() extends AbstractModule {
     deploymentsResource: v2.DeploymentsResource,
     schemaResource: v2.SchemaResource,
     pluginsResource: v2.PluginsResource,
+    templatesResource: v3.TemplatesResource,
     deprecatedFeaturesSet: DeprecatedFeatureSet): RootApplication = {
 
     val maybeSchemaResource = if (deprecatedFeaturesSet.isEnabled(DeprecatedFeatures.jsonSchemasResource))
@@ -99,6 +103,6 @@ class MarathonRestModule() extends AbstractModule {
     new RootApplication(
       Seq(marathonExceptionMapper),
       List(systemResource, appsResource, podsResource, tasksResource, queueResource, groupsResource,
-        infoResource, leaderResource, deploymentsResource, pluginsResource) ++ maybeSchemaResource)
+        infoResource, leaderResource, deploymentsResource, pluginsResource, templatesResource) ++ maybeSchemaResource)
   }
 }

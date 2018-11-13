@@ -30,10 +30,11 @@ import scala.util.Success
 @Consumes(Array(MediaType.APPLICATION_JSON))
 @Produces(Array(MediaType.APPLICATION_JSON))
 class TemplatesResource @Inject() (
-                                    templateRepository: SyncTemplateRepository,
-                                    eventBus: EventStream,
-                                    val config: MarathonConf,
-                                    pluginManager: PluginManager)(implicit
+    templateRepository: SyncTemplateRepository,
+    eventBus: EventStream,
+    val config: MarathonConf,
+    pluginManager: PluginManager)(
+    implicit
     val authenticator: Authenticator,
     val authorizer: Authorizer,
     val executionContext: ExecutionContext,
