@@ -19,7 +19,7 @@ import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 
 import scala.concurrent.Future
 
-class MigrationTo18Test extends AkkaUnitTest with StrictLogging with Inspectors {
+class MigrationTo18CreatedTest extends AkkaUnitTest with StrictLogging with Inspectors {
 
   "Migration to 18" should {
     "Update instance condition from Created to Provisioned" in {
@@ -51,7 +51,7 @@ class MigrationTo18Test extends AkkaUnitTest with StrictLogging with Inspectors 
       f.instanceRepository.store(equalTo(instance3)) returns Future.successful(Done) //instance is unchanged
 
       When("they are migrated")
-      MigrationTo18.migrateInstanceConditions(f.instanceRepository, f.persistenceStore).futureValue
+      MigrationTo18Created.migrateInstanceConditions(f.instanceRepository, f.persistenceStore).futureValue
 
       Then("all updated instances are saved")
       verify(f.instanceRepository, times(2)).store(any)

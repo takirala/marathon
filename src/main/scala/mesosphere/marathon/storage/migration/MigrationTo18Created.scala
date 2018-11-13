@@ -28,14 +28,14 @@ import org.apache.mesos.{Protos => MesosProtos}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class MigrationTo18(instanceRepository: InstanceRepository, persistenceStore: PersistenceStore[_, _, _]) extends MigrationStep with StrictLogging {
+class MigrationTo18Created(instanceRepository: InstanceRepository, persistenceStore: PersistenceStore[_, _, _]) extends MigrationStep with StrictLogging {
 
   override def migrate()(implicit ctx: ExecutionContext, mat: Materializer): Future[Done] = {
-    MigrationTo18.migrateInstanceConditions(instanceRepository, persistenceStore)
+    MigrationTo18Created.migrateInstanceConditions(instanceRepository, persistenceStore)
   }
 }
 
-object MigrationTo18 extends MaybeStore with StrictLogging {
+object MigrationTo18Created extends MaybeStore with StrictLogging {
 
   import Instance.agentFormat
   import mesosphere.marathon.api.v2.json.Formats.TimestampFormat
