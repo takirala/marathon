@@ -5,6 +5,7 @@ import java.net.URI
 
 import akka.event.EventStream
 import akka.stream.Materializer
+import com.typesafe.scalalogging.StrictLogging
 import javax.inject.Inject
 import javax.servlet.http.HttpServletRequest
 import javax.ws.rs._
@@ -38,7 +39,7 @@ class TemplatesResource @Inject() (
     val authenticator: Authenticator,
     val authorizer: Authorizer,
     val executionContext: ExecutionContext,
-    val mat: Materializer) extends RestResource with AuthResource {
+    val mat: Materializer) extends RestResource with AuthResource with StrictLogging {
 
   import AppHelpers._
   import Normalization._
@@ -52,9 +53,10 @@ class TemplatesResource @Inject() (
   private implicit val validateAndNormalizeApp: Normalization[raml.App] =
     appNormalization(config.availableFeatures, normalizationConfig)(AppNormalization.withCanonizedIds())
 
-  // TODO(ad): add checking authorization for all calls
+  // TODO(ad): add checking resource authorization for all calls
+  // TODO(ad): prevent users from modifying same pathId concurrently
+  // TODO(ad): filter created pathIds for key words like `latest` etc
 
-  @SuppressWarnings(Array("all")) // async/await
   @POST
   @ManagedAsync
   def create(
@@ -91,10 +93,18 @@ class TemplatesResource @Inject() (
       } else {
         // Collect all existing templates and order them by the version timestamp
         val templates = versions
-          .map(v => templateRepository.readSync(AppDefinition(id = templateId), version = v))
-          .collect{ case Success(t) => t }
+          .map{ v =>
+            templateRepository.readSync(AppDefinition(id = templateId), version = v) match {
+              case Success(t) => t
+              case scala.util.Failure(ex) =>
+                logger.error(s"Failed to load template $templateId/$v from the repository", ex)
+                throw new TemplateNotFoundException(templateId, Some(v))
+            }
+          }
           .sortBy(t => t.version)
-        val template = templates.head
+          .reverse
+
+        val template = templates.headOption.getOrElse(throw new TemplateNotFoundException(templateId))
 
         Response
           .ok()
@@ -135,7 +145,7 @@ class TemplatesResource @Inject() (
       implicit val identity = await(authenticatedAsync(req))
 
       val templateId = PathId(id)
-      val template = templateRepository.readSync(AppDefinition(id = templateId), version).getOrElse(throw new TemplateNotFoundException(templateId))
+      val template = templateRepository.readSync(AppDefinition(id = templateId), version).getOrElse(throw new TemplateNotFoundException(templateId, Some(version)))
 
       checkAuthorization(ViewRunSpec, template)
 
