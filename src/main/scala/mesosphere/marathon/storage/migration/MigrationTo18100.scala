@@ -110,9 +110,7 @@ object MigrationTo18100 extends InstanceMigration with StrictLogging {
     * @param jsValue The instance as JSON.
     * @return The parsed instance.
     */
-  def extractInstanceFromJson(jsValue: JsValue): Instance = {
-    jsValue.as[Instance](instanceJsonReads17)
-  }
+  def extractInstanceFromJson(jsValue: JsValue): Instance = jsValue.as[Instance](instanceJsonReads17)
 
   // This flow parses all provided instances and updates their goals. It does not save the updated instances.
   override val migrationFlow = Flow[JsValue].map(extractInstanceFromJson)
